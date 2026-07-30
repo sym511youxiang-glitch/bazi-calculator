@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title data-i18n="html.title">免费八字排盘 — 查你的日主与四柱｜真太阳时校正</title>
+    <meta
+      name="description"
+      data-i18n-attr="content:html.desc"
+      content="免费八字（四柱）排盘。处理真太阳时、历史时区与夏令时、节气交界，并把每一步计算过程都摊开给你看。"
+    />
+    
+    <script>window.__LANG__='zh'</script>
+    <script type="module" crossorigin src="/bazi-calculator/assets/index-SDti5oTv.js"></script>
+    <link rel="stylesheet" crossorigin href="/bazi-calculator/assets/index-jGf0B5sY.css">
+    <link rel="alternate" hreflang="zh" href="/bazi-calculator/" />
+    <link rel="alternate" hreflang="en" href="/bazi-calculator/en/" />
+    <link rel="alternate" hreflang="x-default" href="/bazi-calculator/" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-row">
+        <div>
+          <h1 data-i18n="header.title">八字排盘</h1>
+          <p class="tagline" data-i18n="header.tagline">四柱 — 认真算，并且把过程给你看。</p>
+        </div>
+        <a class="lang-switch" id="lang-switch" href="en/" data-i18n="lang.switch">English</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      
+      <section class="card" id="form-card">
+        <form id="birth-form" novalidate>
+          <div class="grid-2">
+            <label class="field">
+              <span data-i18n="form.date">出生日期</span>
+              <input type="date" id="birth-date" required min="1901-01-01" max="2100-12-31" />
+            </label>
+
+            <label class="field">
+              <span data-i18n="form.time">出生时间</span>
+              <input type="time" id="birth-time" required />
+            </label>
+          </div>
+
+          <label class="field city-field">
+            <span data-i18n="form.place">出生地</span>
+            <input
+              type="text"
+              id="birth-city"
+              data-i18n-attr="placeholder:form.placeCue"
+              placeholder="输入城市名，例如 上海 / Singapore"
+              autocomplete="off"
+              required
+            />
+            <div id="city-results" class="city-results" hidden></div>
+            <small id="city-picked" class="hint" hidden></small>
+          </label>
+
+          
+          <fieldset class="field clock-field" id="clock-zone-field" hidden>
+            <legend data-i18n="clock.legend">出生证明上的时间，是按哪个时钟记的？</legend>
+            <p class="note" data-i18n="clock.note">这个地区的地理时区和全国统一时钟不一样。选错会整整差两个小时，足以算错时柱，跨过子时还会错日柱。</p>
+            <div class="radio-col">
+              <label
+                ><input type="radio" name="clock-zone" id="clock-official" checked />
+                <span id="clock-official-label"></span></label
+              >
+              <label
+                ><input type="radio" name="clock-zone" id="clock-local" />
+                <span id="clock-local-label"></span></label
+              >
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>
+              <span data-i18n="form.gender">性别</span>
+              <small data-i18n="form.genderNote">（决定大运顺逆）</small>
+            </legend>
+            <div class="radio-row">
+              <label
+                ><input type="radio" name="gender" value="male" checked />
+                <span data-i18n="form.male">男</span></label
+              >
+              <label
+                ><input type="radio" name="gender" value="female" />
+                <span data-i18n="form.female">女</span></label
+              >
+            </div>
+          </fieldset>
+
+          <details class="advanced">
+            <summary data-i18n="adv.summary">流派设置 — 会改变盘面</summary>
+            <p class="note" data-i18n="adv.note">这些不是偏好设置。不同八字流派在这几处确实有分歧，而分歧会直接改变你的日柱或月柱。我们默认取最常见的选择，并在它真的影响到你时明确告诉你。</p>
+
+            <label class="field">
+              <span data-i18n="adv.timeBasis">时间基准</span>
+              <select id="time-basis">
+                <option value="true_solar" selected data-i18n="adv.basis.true">真太阳时 — 经度时差 + 均时差</option>
+                <option value="mean_solar" data-i18n="adv.basis.mean">平太阳时 — 只做经度时差</option>
+                <option value="civil" data-i18n="adv.basis.civil">钟表时间 — 不做校正</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span data-i18n="adv.dayBoundary">日界规则</span>
+              <select id="day-boundary">
+                <option value="midnight" selected data-i18n="adv.boundary.midnight">子夜换日（00:00）— 晚子时仍属当日</option>
+                <option value="zi23" data-i18n="adv.boundary.zi23">子初换日（23:00）— 23:00 起即属次日</option>
+              </select>
+            </label>
+          </details>
+
+          <button type="submit" class="primary" data-i18n="form.submit">排我的盘</button>
+          <p id="form-error" class="error" hidden></p>
+        </form>
+      </section>
+
+      
+      <section id="result" hidden>
+        <div class="card day-master-card">
+          <p class="eyebrow" data-i18n="res.dayMasterEyebrow">你的日主</p>
+          <h2 id="day-master-label"></h2>
+          <p id="day-master-sub" class="muted"></p>
+        </div>
+
+        <div class="card">
+          <h3 data-i18n="res.fourPillars">四柱</h3>
+          <div class="pillars" id="pillars"></div>
+        </div>
+
+        <div class="card" id="boundary-card" hidden>
+          <h3 data-i18n="res.boundaryTitle">⚠ 你的出生时间正好落在分界线上</h3>
+          <div id="boundary-list"></div>
+          <p class="note" data-i18n="res.boundaryNote">这是流派选择，不是算错。两种结果各自内部一致，只是依据的规则不同。大多数排盘工具会默默替你选一个，从不告诉你这里有过选择。你可以在上面的「流派设置」里切换。</p>
+        </div>
+
+        <div class="card">
+          <h3>
+            <span data-i18n="res.luck">大运</span>
+            <small class="muted" data-i18n="res.luckSub"></small>
+          </h3>
+          <p id="luck-summary" class="muted"></p>
+          <div class="luck" id="luck-pillars"></div>
+        </div>
+
+        
+        <div class="card audit-card">
+          <h3 data-i18n="res.auditTitle">这盘是怎么算出来的</h3>
+          <p class="note" data-i18n="res.auditNote">市面上的八字库都只接受"年月日时"。它们全都跳过了最容易出错的那一步：把出生地的钟表读数变成一个真实的天文时刻。下面是我们的每一步。</p>
+          <table class="audit" id="audit-table"></table>
+          <p class="attribution" id="attribution"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap site-footer">
+      <p data-i18n-html="footer.credit">排盘：<a href="https://github.com/6tail/lunar-javascript">lunar-javascript</a>（MIT），并用 <a href="https://github.com/cosinekitty/astronomy">astronomy-engine</a>（MIT）交叉验证。两个独立实现在 1901–2050 区间的节气时刻一致性优于 <strong>52 秒</strong>。</p>
+      <p class="disclaimer" data-i18n="footer.disclaimer">仅供娱乐与自我省思之用。</p>
+    </footer>
+
+  </body>
+</html>

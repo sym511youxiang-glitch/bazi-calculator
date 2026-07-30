@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title data-i18n="html.title">Free BaZi Calculator — Find Your Day Master | Four Pillars of Destiny</title>
+    <meta
+      name="description"
+      data-i18n-attr="content:html.desc"
+      content="Free BaZi (Four Pillars of Destiny) calculator. Handles true solar time, historical time zones and solar-term boundaries — and shows every step of the calculation."
+    />
+    
+    <script>window.__LANG__='en'</script>
+    <script type="module" crossorigin src="/bazi-calculator/assets/index-SDti5oTv.js"></script>
+    <link rel="stylesheet" crossorigin href="/bazi-calculator/assets/index-jGf0B5sY.css">
+    <link rel="alternate" hreflang="zh" href="/bazi-calculator/" />
+    <link rel="alternate" hreflang="en" href="/bazi-calculator/en/" />
+    <link rel="alternate" hreflang="x-default" href="/bazi-calculator/" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-row">
+        <div>
+          <h1 data-i18n="header.title">BaZi Calculator</h1>
+          <p class="tagline" data-i18n="header.tagline">Four Pillars of Destiny — calculated properly, and we show our work.</p>
+        </div>
+        <a class="lang-switch" id="lang-switch" href="../" data-i18n="lang.switch">中文</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      
+      <section class="card" id="form-card">
+        <form id="birth-form" novalidate>
+          <div class="grid-2">
+            <label class="field">
+              <span data-i18n="form.date">Date of birth</span>
+              <input type="date" id="birth-date" required min="1901-01-01" max="2100-12-31" />
+            </label>
+
+            <label class="field">
+              <span data-i18n="form.time">Time of birth</span>
+              <input type="time" id="birth-time" required />
+            </label>
+          </div>
+
+          <label class="field city-field">
+            <span data-i18n="form.place">Place of birth</span>
+            <input
+              type="text"
+              id="birth-city"
+              data-i18n-attr="placeholder:form.placeCue"
+              placeholder="Start typing a city — e.g. Singapore"
+              autocomplete="off"
+              required
+            />
+            <div id="city-results" class="city-results" hidden></div>
+            <small id="city-picked" class="hint" hidden></small>
+          </label>
+
+          
+          <fieldset class="field clock-field" id="clock-zone-field" hidden>
+            <legend data-i18n="clock.legend">Which clock was your recorded birth time on?</legend>
+            <p class="note" data-i18n="clock.note">This region's geographic time zone differs from the clock the whole country uses. Getting it wrong shifts your chart by two full hours — enough to change the Hour Pillar, and the Day Pillar if it crosses the Zi hour.</p>
+            <div class="radio-col">
+              <label
+                ><input type="radio" name="clock-zone" id="clock-official" checked />
+                <span id="clock-official-label"></span></label
+              >
+              <label
+                ><input type="radio" name="clock-zone" id="clock-local" />
+                <span id="clock-local-label"></span></label
+              >
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>
+              <span data-i18n="form.gender">Gender</span>
+              <small data-i18n="form.genderNote">(affects the direction of Luck Pillars)</small>
+            </legend>
+            <div class="radio-row">
+              <label
+                ><input type="radio" name="gender" value="male" checked />
+                <span data-i18n="form.male">Male</span></label
+              >
+              <label
+                ><input type="radio" name="gender" value="female" />
+                <span data-i18n="form.female">Female</span></label
+              >
+            </div>
+          </fieldset>
+
+          <details class="advanced">
+            <summary data-i18n="adv.summary">School settings — these change the chart</summary>
+            <p class="note" data-i18n="adv.note">These are not preferences. Different BaZi schools genuinely disagree here, and the disagreement can change your Day Pillar or Month Pillar. We default to the most common choice and tell you when it matters.</p>
+
+            <label class="field">
+              <span data-i18n="adv.timeBasis">Time basis</span>
+              <select id="time-basis">
+                <option value="true_solar" selected data-i18n="adv.basis.true">True solar time — longitude + equation of time</option>
+                <option value="mean_solar" data-i18n="adv.basis.mean">Mean solar time — longitude only</option>
+                <option value="civil" data-i18n="adv.basis.civil">Civil clock time — no correction</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span data-i18n="adv.dayBoundary">Day boundary</span>
+              <select id="day-boundary">
+                <option value="midnight" selected data-i18n="adv.boundary.midnight">Midnight (00:00) — late Zi stays on the same day</option>
+                <option value="zi23" data-i18n="adv.boundary.zi23">Start of Zi (23:00) — 23:00 begins the next day</option>
+              </select>
+            </label>
+          </details>
+
+          <button type="submit" class="primary" data-i18n="form.submit">Calculate my chart</button>
+          <p id="form-error" class="error" hidden></p>
+        </form>
+      </section>
+
+      
+      <section id="result" hidden>
+        <div class="card day-master-card">
+          <p class="eyebrow" data-i18n="res.dayMasterEyebrow">Your Day Master</p>
+          <h2 id="day-master-label"></h2>
+          <p id="day-master-sub" class="muted"></p>
+        </div>
+
+        <div class="card">
+          <h3 data-i18n="res.fourPillars">Four Pillars</h3>
+          <div class="pillars" id="pillars"></div>
+        </div>
+
+        <div class="card" id="boundary-card" hidden>
+          <h3 data-i18n="res.boundaryTitle">⚠ Your birth time sits on a boundary</h3>
+          <div id="boundary-list"></div>
+          <p class="note" data-i18n="res.boundaryNote">This is a school-of-thought choice, not a calculation error. Both readings are internally consistent — they simply follow different rules. Most calculators pick one silently and never tell you there was a choice. You can switch rules under School settings above.</p>
+        </div>
+
+        <div class="card">
+          <h3>
+            <span data-i18n="res.luck">Luck Pillars</span>
+            <small class="muted" data-i18n="res.luckSub">(Da Yun)</small>
+          </h3>
+          <p id="luck-summary" class="muted"></p>
+          <div class="luck" id="luck-pillars"></div>
+        </div>
+
+        
+        <div class="card audit-card">
+          <h3 data-i18n="res.auditTitle">How we calculated this</h3>
+          <p class="note" data-i18n="res.auditNote">Every BaZi library on the market takes only a date and a clock time. None of them handle the step that actually goes wrong most often: turning a birthplace's local clock reading into a real astronomical moment. Here is every step of ours.</p>
+          <table class="audit" id="audit-table"></table>
+          <p class="attribution" id="attribution"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap site-footer">
+      <p data-i18n-html="footer.credit">Calculations: <a href="https://github.com/6tail/lunar-javascript">lunar-javascript</a> (MIT), cross-verified against <a href="https://github.com/cosinekitty/astronomy">astronomy-engine</a> (MIT). Solar-term agreement between the two independent implementations is within <strong>52 seconds across 1901–2050</strong>.</p>
+      <p class="disclaimer" data-i18n="footer.disclaimer">For entertainment and self-reflection purposes only.</p>
+    </footer>
+
+  </body>
+</html>
